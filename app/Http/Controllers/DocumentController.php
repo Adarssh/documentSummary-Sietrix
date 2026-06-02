@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\processDocumentSummary;
 use App\Models\Document as ModelsDocument;
 use Dom\Document;
 use Illuminate\Http\Request;
@@ -42,6 +43,8 @@ class DocumentController extends Controller
             'file_size' => $fileSize,
             'status' => 'pending',
         ]);
+
+        processDocumentSummary::dispatch($document);
 
         return response()->json([
             'success' => true,

@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\Document;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Storage;
 use PhpParser\Comment\Doc;
 
 class processDocumentSummary implements ShouldQueue
@@ -16,7 +17,7 @@ class processDocumentSummary implements ShouldQueue
      */
     public function __construct(public Document $document)
     {
-        processDocumentSummary::dispatchSync($document);
+
     }
 
     /**
@@ -27,15 +28,14 @@ class processDocumentSummary implements ShouldQueue
         $document = Document::where('status', 'pending')->first();
         $document->update(['status' => 'processing', 'processed_at' => now()]);
 
-        $text = fopen($document->file_path, 'r');
+        $text = Storage::get($document->file_path);
 
         if (!$text) {
             $document->update(['status' => 'failed', 'error_message' => 'Failed to process document.']);
             return;
         }
-        $textContent = fread($text, 1000);
+        $textContent = substr($text, 0, 1000);
         $summary = app(\App\Services\Ai\AiSummaryService::class)->summarize($textContent);
-        fclose($text);
         $document->update(['status' => 'completed', 'summary' => $summary]);
     }
 }
