@@ -43,6 +43,8 @@ class DocumentController extends Controller
             'status' => 'pending',
         ]);
 
+        processDocumentSummary::dispatch($document);
+
         return response()->json([
             'success' => true,
             'message' => 'Document uploaded successfully and queued for processing.',
