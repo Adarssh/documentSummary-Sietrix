@@ -16,7 +16,6 @@ class processDocumentSummary implements ShouldQueue
      */
     public function __construct(public Document $document)
     {
-        processDocumentSummary::dispatchSync($document);
     }
 
     /**
